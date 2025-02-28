@@ -330,7 +330,7 @@ const LandingPage = () => {
                 p={6}
                 boxShadow="0 8px 20px rgba(0, 0, 0, 0.2)"
                 _hover={{ transform: "translateY(-5px)", boxShadow: "0 12px 30px rgba(0, 196, 180, 0.3)" }}
-                transition={{ duration: 0.3, ease: "ease" }} // Updated here
+                // Removed transition prop here
               >
                 <VStack spacing={4} align="start">
                   <Box>{feature.icon}</Box>
@@ -404,7 +404,7 @@ const LandingPage = () => {
                 borderRadius="md"
                 p={6}
                 _hover={{ bg: "rgba(30, 40, 60, 1)", transform: "translateY(-5px)" }}
-                transition={{ duration: 0.3, ease: "ease" }} // Updated here
+                // Removed transition prop here
               >
                 <Box mr={4}>{step.icon}</Box>
                 <VStack align="start" spacing={2}>
@@ -533,7 +533,7 @@ const LandingPage = () => {
                 p={6}
                 boxShadow="0 8px 20px rgba(0, 0, 0, 0.2)"
                 _hover={{ transform: "translateY(-5px)", boxShadow: "0 12px 30px rgba(0, 196, 180, 0.3)" }}
-                transition={{ duration: 0.3, ease: "ease" }} // Updated here
+                // Removed transition prop here
               >
                 <VStack spacing={4} align="start">
                   <Box>{benefit.icon}</Box>
