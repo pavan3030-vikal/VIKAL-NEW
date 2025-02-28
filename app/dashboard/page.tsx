@@ -40,7 +40,8 @@ import {
   ExternalLinkIcon,
   InfoIcon,
   AddIcon,
-  ChevronRightIcon,
+  HamburgerIcon,
+  CloseIcon,
 } from "@chakra-ui/icons";
 import ReactMarkdown from "react-markdown";
 import { auth } from "../lib/firebase";
@@ -74,7 +75,7 @@ interface ResponseData {
   examTips?: string;
 }
 
-const API_URL = "https://vikal-backend3030-production.up.railway.app";
+const API_URL = "https://vikalnew2-production.up.railway.app/";
 
 const responseTextStyles = css`
   .response-text {
@@ -113,13 +114,17 @@ const DashboardPage: React.FC = () => {
   });
   const [stats, setStats] = useState({ active_users: 0, questions_solved: 0, explanations_given: 0 });
   const [feedback, setFeedback] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar toggle
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar starts open on all devices
   const { hasCopied, onCopy } = useClipboard(responseData.notes);
   const toast = useToast();
   const router = useRouter();
 
-  const padding = useBreakpointValue({ base: 3, md: 6 });
-  const fontSize = useBreakpointValue({ base: "2xl", md: "4xl" });
+  // Responsive values
+  const padding = useBreakpointValue({ base: 2, sm: 3, md: 6 });
+  const fontSize = useBreakpointValue({ base: "xl", sm: "2xl", md: "4xl" });
+  const sidebarWidth = useBreakpointValue({ base: "70%", sm: "50%", md: "250px" });
+  const inputFontSize = useBreakpointValue({ base: "sm", md: "md" });
+  const buttonSize = useBreakpointValue({ base: "sm", md: "md" });
 
   useEffect(() => {
     setPersistence(auth, browserLocalPersistence)
@@ -145,7 +150,7 @@ const DashboardPage: React.FC = () => {
 
     // Animate stats with random numbers
     const animateStats = () => {
-      const randomValue = () => Math.floor(Math.random() * 300) + 1; // Random number between 1 and 300
+      const randomValue = () => Math.floor(Math.random() * 300) + 1;
       setStats({
         active_users: randomValue(),
         questions_solved: randomValue(),
@@ -153,9 +158,9 @@ const DashboardPage: React.FC = () => {
       });
     };
 
-    animateStats(); // Initial call
-    const interval = setInterval(animateStats, 2000); // Update every 2 seconds
-    return () => clearInterval(interval); // Cleanup
+    animateStats();
+    const interval = setInterval(animateStats, 2000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleGoogleSignIn = async () => {
@@ -337,16 +342,16 @@ const DashboardPage: React.FC = () => {
           backdropFilter="blur(12px)"
           borderRadius="2xl"
           boxShadow="0 8px 32px rgba(0, 0, 0, 0.5)"
-          p={6}
-          maxW="md"
+          p={padding}
+          maxW={{ base: "90%", sm: "md" }}
           textAlign="center"
         >
           <VStack spacing={6}>
             <MotionBox animate={{ scale: [1, 1.05, 1] }}>
-              <Image src="/image27.png" alt="VIKAL Logo" boxSize="80px" mx="auto" />
+              <Image src="/image27.png" alt="VIKAL Logo" boxSize={{ base: "60px", md: "80px" }} mx="auto" />
             </MotionBox>
             <Text
-              fontSize={{ base: "3xl", md: "4xl" }}
+              fontSize={{ base: "2xl", md: "4xl" }}
               fontWeight="extrabold"
               bgGradient="linear(to-r, white, #ffdd57)"
               bgClip="text"
@@ -354,12 +359,12 @@ const DashboardPage: React.FC = () => {
             >
               VIKAL 🚀
             </Text>
-            <Text fontSize={{ base: "lg", md: "xl" }} color="gray.300" fontWeight="medium" px={4}>
+            <Text fontSize={{ base: "md", md: "xl" }} color="gray.300" fontWeight="medium" px={4}>
               Unleash Your Prep Power!
             </Text>
             <MotionBox whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
-                size="lg"
+                size={buttonSize}
                 bg="#ffdd57"
                 color="#0a0a0c"
                 rounded="full"
@@ -385,10 +390,10 @@ const DashboardPage: React.FC = () => {
                     />
                   </svg>
                 }
-                fontSize="lg"
+                fontSize={inputFontSize}
                 fontWeight="bold"
-                py={6}
-                px={8}
+                py={{ base: 4, md: 6 }}
+                px={{ base: 6, md: 8 }}
               >
                 Get Started
               </Button>
@@ -407,6 +412,7 @@ const DashboardPage: React.FC = () => {
       position="relative"
       overflow="hidden"
       display="flex"
+      flexDirection={{ base: "column", md: "row" }}
       css={responseTextStyles}
       variants={pageVariants}
       initial="initial"
@@ -430,12 +436,12 @@ const DashboardPage: React.FC = () => {
       {/* Terms and Conditions Modal */}
       <Modal isOpen={!termsAccepted && !!user} onClose={() => {}} isCentered closeOnOverlayClick={false}>
         <ModalOverlay />
-        <ModalContent bg="rgba(20, 20, 25, 0.9)" color="white" borderRadius="xl" maxW="md">
+        <ModalContent bg="rgba(20, 20, 25, 0.9)" color="white" borderRadius="xl" maxW={{ base: "90%", md: "md" }}>
           <ModalHeader bgGradient="linear(to-r, white, #ffdd57)" bgClip="text" fontFamily="Orbitron, sans-serif">
             Terms and Conditions
           </ModalHeader>
           <ModalBody maxH="60vh" overflowY="auto">
-            <Text fontSize="sm" lineHeight="1.6">
+            <Text fontSize={{ base: "xs", md: "sm" }} lineHeight="1.6">
               <strong>Effective Date:</strong> February 27, 2025
               <br />
               <br />
@@ -484,6 +490,7 @@ const DashboardPage: React.FC = () => {
               rounded="full"
               _hover={{ boxShadow: "0 0 20px rgba(255, 221, 87, 0.8)" }}
               onClick={handleAcceptTerms}
+              size={buttonSize}
             >
               Accept
             </Button>
@@ -494,40 +501,39 @@ const DashboardPage: React.FC = () => {
       {/* Dashboard content */}
       {termsAccepted && (
         <>
+          {/* Sidebar */}
           <Box
-            w={{ base: isSidebarOpen ? "full" : "0", md: "250px" }}
+            w={isSidebarOpen ? sidebarWidth : "0"}
             p={padding}
             bg="rgba(20, 20, 25, 0.9)"
             backdropFilter="blur(12px)"
             borderRight="1px solid rgba(255, 255, 255, 0.1)"
-            position={{ base: "absolute", md: "fixed" }}
+            position="fixed"
             top={0}
-            h={{ base: "100vh", md: "100vh" }}
-            zIndex={2}
+            h="100vh"
+            zIndex={10}
             display="flex"
             flexDirection="column"
             transition="width 0.3s ease"
             overflowX="hidden"
+            boxShadow={isSidebarOpen ? "lg" : "none"}
           >
-            <IconButton
-              icon={isSidebarOpen ? <ChevronRightIcon /> : <ChevronDownIcon />}
-              aria-label="Toggle Sidebar"
-              bg="transparent"
-              color="#ffdd57"
-              position="absolute"
-              top={2}
-              right={2}
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              display={{ base: "block", md: "none" }}
-            />
-            <Box flexShrink={0}>
-              <HStack spacing={2} mb={1}>
-                <Image src="/image27.png" alt="VIKAL Logo" boxSize="95px" />
+            <HStack justify="space-between" mb={4}>
+              <HStack spacing={2}>
+                <Image src="/image27.png" alt="VIKAL Logo" boxSize={{ base: "60px", md: "95px" }} />
               </HStack>
-              <Text fontSize="xs" color="gray.400" mb={4}>
-                AI Tyari VIKAL
-              </Text>
-            </Box>
+              <IconButton
+                icon={isSidebarOpen ? <CloseIcon /> : <HamburgerIcon />}
+                aria-label="Toggle Sidebar"
+                bg="transparent"
+                color="#ffdd57"
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                size="sm"
+              />
+            </HStack>
+            <Text fontSize={{ base: "xs", md: "xs" }} color="gray.400" mb={4}>
+              AI Tyari VIKAL
+            </Text>
             <VStack spacing={4} align="stretch" flex={1} overflowY="auto">
               <MotionBox
                 bg="rgba(40, 40, 45, 0.8)"
@@ -541,13 +547,13 @@ const DashboardPage: React.FC = () => {
                 whileHover={{ scale: 1.05 }}
               >
                 <HStack justify="space-between">
-                  <Text fontSize="sm" color="#ffdd57">
+                  <Text fontSize={{ base: "xs", md: "sm" }} color="#ffdd57">
                     Summarize YouTube
                   </Text>
                   <ChevronRightIcon color="#ffdd57" />
                 </HStack>
               </MotionBox>
-              <Text fontSize="sm" fontWeight="medium" color="gray.300">
+              <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium" color="gray.300">
                 Recent 📜
               </Text>
               {chatHistory.map((chat) => (
@@ -564,7 +570,7 @@ const DashboardPage: React.FC = () => {
                       setResponseData({ notes: chat.response, resources: [] });
                     }}
                   >
-                    <Text fontSize="xs" noOfLines={1}>
+                    <Text fontSize={{ base: "xs", md: "xs" }} noOfLines={1}>
                       {chat.question}
                     </Text>
                     <Text fontSize="2xs" color="gray.500">
@@ -578,7 +584,7 @@ const DashboardPage: React.FC = () => {
               <VStack spacing={2}>
                 <HStack spacing={2}>
                   <Avatar size="xs" src={user.photoURL || undefined} name={user.displayName || "User"} />
-                  <Text fontSize="xs" fontWeight="medium">
+                  <Text fontSize={{ base: "xs", md: "xs" }} fontWeight="medium">
                     {user.displayName}
                   </Text>
                 </HStack>
@@ -587,7 +593,7 @@ const DashboardPage: React.FC = () => {
                   bg="#ffdd57"
                   color="#0a0a0c"
                   rounded="full"
-                  size="sm"
+                  size={buttonSize}
                   _hover={{ transform: "scale(1.03)" }}
                   onClick={handleSignOut}
                 >
@@ -597,7 +603,14 @@ const DashboardPage: React.FC = () => {
             </Box>
           </Box>
 
-          <Box flex={1} ml={{ base: 0, md: "250px" }} p={padding} zIndex={1}>
+          {/* Main Content */}
+          <Box
+            flex={1}
+            ml={{ md: isSidebarOpen ? sidebarWidth : "0" }}
+            p={padding}
+            transition="margin-left 0.3s ease"
+            zIndex={1}
+          >
             {showTrialEndPopup && (
               <MotionBox
                 position="fixed"
@@ -613,13 +626,13 @@ const DashboardPage: React.FC = () => {
                 borderRadius="lg"
                 boxShadow="0 0 40px rgba(255, 221, 87, 0.6)"
                 border="3px solid #ffdd57"
-                p={6}
-                maxW="sm"
+                p={padding}
+                maxW={{ base: "90%", sm: "sm" }}
                 textAlign="center"
               >
                 <VStack spacing={4}>
                   <Text
-                    fontSize="2xl"
+                    fontSize={{ base: "xl", md: "2xl" }}
                     fontWeight="bold"
                     bgGradient="linear(to-r, #ffdd57, white)"
                     bgClip="text"
@@ -627,14 +640,14 @@ const DashboardPage: React.FC = () => {
                   >
                     Free Trial Ended!
                   </Text>
-                  <Text fontSize="md" color="gray.300">
+                  <Text fontSize={{ base: "sm", md: "md" }} color="gray.300">
                     Your 3 free chats are up—upgrade to Pro for unlimited access!
                   </Text>
                   <Box p={3} bg="rgba(40, 40, 45, 0.9)" borderRadius="md" border="2px solid #ffdd57">
-                    <Text fontSize="lg" fontWeight="bold" color="#ffdd57">
+                    <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color="#ffdd57">
                       ₹199/month
                     </Text>
-                    <Text fontSize="sm" color="gray.400">
+                    <Text fontSize={{ base: "xs", md: "sm" }} color="gray.400">
                       Unlimited chats & premium features
                     </Text>
                   </Box>
@@ -645,6 +658,7 @@ const DashboardPage: React.FC = () => {
                       rounded="full"
                       _hover={{ boxShadow: "0 0 25px rgba(255, 221, 87, 1)" }}
                       onClick={handleUpgradeToPro}
+                      size={buttonSize}
                     >
                       Upgrade to Pro
                     </Button>
@@ -676,13 +690,13 @@ const DashboardPage: React.FC = () => {
                 borderRadius="xl"
                 boxShadow="0 8px 32px rgba(0, 0, 0, 0.5)"
                 border="2px solid rgba(255, 221, 87, 0.5)"
-                p={6}
-                maxW="sm"
+                p={padding}
+                maxW={{ base: "90%", sm: "sm" }}
                 textAlign="center"
               >
                 <VStack spacing={4}>
                   <Text
-                    fontSize="2xl"
+                    fontSize={{ base: "xl", md: "2xl" }}
                     fontWeight="extrabold"
                     bgGradient="linear(to-r, white, #ffdd57)"
                     bgClip="text"
@@ -690,14 +704,14 @@ const DashboardPage: React.FC = () => {
                   >
                     Upgrade to VIKAL Pro
                   </Text>
-                  <Text fontSize="md" color="gray.300">
+                  <Text fontSize={{ base: "sm", md: "md" }} color="gray.300">
                     You’ve hit your 3 free chats. Go Pro for unlimited learning!
                   </Text>
                   <Box p={4} bg="rgba(40, 40, 45, 0.8)" borderRadius="md" border="1px dashed #ffdd57">
-                    <Text fontSize="xl" fontWeight="bold" color="#ffdd57">
+                    <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color="#ffdd57">
                       ₹199/month
                     </Text>
-                    <Text fontSize="sm" color="gray.300">
+                    <Text fontSize={{ base: "xs", md: "sm" }} color="gray.300">
                       - Unlimited AI chats
                       <br />
                       - Custom exam dates (soon)
@@ -712,12 +726,13 @@ const DashboardPage: React.FC = () => {
                       rounded="full"
                       _hover={{ boxShadow: "0 0 20px rgba(255, 221, 87, 0.8)" }}
                       onClick={handleUpgradeToPro}
+                      size={buttonSize}
                     >
                       Go Pro Now
                     </Button>
                   </MotionBox>
                   <FormControl>
-                    <FormLabel fontSize="sm" color="gray.300">
+                    <FormLabel fontSize={{ base: "xs", md: "sm" }} color="gray.300">
                       How’s your experience with VIKAL?
                     </FormLabel>
                     <Textarea
@@ -753,11 +768,11 @@ const DashboardPage: React.FC = () => {
               </MotionBox>
             )}
 
-            <VStack align="stretch" maxW="4xl" mx="auto" spacing={6}>
+            <VStack align="stretch" maxW={{ base: "100%", md: "4xl" }} mx="auto" spacing={6}>
               <MotionBox initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-                <HStack justify="center" spacing={0}>
-                  <Image src="/image27.png" alt="VIKAL Logo" boxSize="200px" />
-                  <Text fontSize="75px" color="#ffdd57" fontFamily="Orbitron,sans-serif">
+                <HStack justify="center" spacing={0} flexWrap="wrap">
+                  <Image src="/image27.png" alt="VIKAL Logo" boxSize={{ base: "120px", md: "200px" }} />
+                  <Text fontSize={{ base: "4xl", md: "75px" }} color="#ffdd57" fontFamily="Orbitron,sans-serif">
                     VIKAL
                   </Text>
                 </HStack>
@@ -770,10 +785,10 @@ const DashboardPage: React.FC = () => {
                 >
                   VIKAL: Your AI Prep Buddy 🤓
                 </Text>
-                <Text fontSize="sm" color="gray.400" textAlign="center">
+                <Text fontSize={{ base: "xs", md: "sm" }} color="gray.400" textAlign="center">
                   AI Tyari VIKAL - Ace Exams & Learn Smart
                 </Text>
-                <Text fontSize="sm" color="gray.400" textAlign="center">
+                <Text fontSize={{ base: "xs", md: "sm" }} color="gray.400" textAlign="center">
                   {localStorage.getItem("vikalPro")
                     ? "Unlimited Chats (Pro)"
                     : `Chats Left: ${3 - chatHistory.length}/3`}
@@ -784,7 +799,7 @@ const DashboardPage: React.FC = () => {
                 <HStack justify="center" spacing={4}>
                   <HStack>
                     <InfoIcon color={isSolveMode ? "gray.500" : "#ffdd57"} />
-                    <Text fontSize="sm" color={isSolveMode ? "gray.500" : "#ffdd57"}>
+                    <Text fontSize={{ base: "xs", md: "sm" }} color={isSolveMode ? "gray.500" : "#ffdd57"}>
                       Learn
                     </Text>
                   </HStack>
@@ -792,16 +807,16 @@ const DashboardPage: React.FC = () => {
                     isChecked={isSolveMode}
                     onChange={(e) => setIsSolveMode(e.target.checked)}
                     colorScheme="yellow"
-                    size="lg"
+                    size={{ base: "md", md: "lg" }}
                   />
                   <HStack>
-                    <Text fontSize="sm" color={isSolveMode ? "#ffdd57" : "gray.500"}>
+                    <Text fontSize={{ base: "xs", md: "sm" }} color={isSolveMode ? "#ffdd57" : "gray.500"}>
                       Solve
                     </Text>
                     <AddIcon color={isSolveMode ? "#ffdd57" : "gray.500"} />
                   </HStack>
                 </HStack>
-                <HStack w="full" spacing={4}>
+                <VStack w="full" spacing={2}>
                   <Box position="relative" w="full">
                     <Input
                       placeholder={
@@ -817,10 +832,10 @@ const DashboardPage: React.FC = () => {
                       border="none"
                       color="white"
                       _placeholder={{ color: "gray.500" }}
-                      py={6}
-                      px={6}
+                      py={{ base: 4, md: 6 }}
+                      px={{ base: 4, md: 6 }}
                       rounded="xl"
-                      fontSize="md"
+                      fontSize={inputFontSize}
                       boxShadow="0 4px 16px rgba(0, 0, 0, 0.3)"
                       _focus={{ boxShadow: "0 0 0 3px rgba(255, 221, 87, 0.5)" }}
                     />
@@ -836,78 +851,80 @@ const DashboardPage: React.FC = () => {
                       _hover={{ transform: "translateY(-50%) scale(1.1)" }}
                       onClick={handleSearch}
                       aria-label={isSolveMode ? "Solve" : "Explain"}
-                      size="md"
+                      size={buttonSize}
                     />
                   </Box>
                   {isSolveMode && (
-                    <Menu>
-                      <MenuButton
-                        as={Button}
-                        w="200px"
-                        bg="rgba(50, 50, 55, 0.8)"
-                        color="white"
-                        rightIcon={<ChevronDownIcon />}
-                        _hover={{ bg: "rgba(70, 70, 75, 0.8)" }}
-                        borderRadius="md"
-                        size="md"
-                      >
-                        {selectedExam}
-                      </MenuButton>
-                      <MenuList
-                        bg="rgba(40, 40, 45, 0.9)"
-                        border="none"
-                        borderRadius="md"
-                        minW="120px"
-                      >
-                        {exams.map((exam) => (
-                          <MenuItem
-                            key={exam}
-                            onClick={() => setSelectedExam(exam)}
-                            bg="transparent"
-                            _hover={{ bg: "rgba(60, 60, 65, 0.8)" }}
-                            fontSize="sm"
-                          >
-                            {exam}
-                          </MenuItem>
-                        ))}
-                      </MenuList>
-                    </Menu>
-                  )}
-                </HStack>
-                {isSolveMode && selectedExam !== "Select Exam" && (
-                  <Menu>
-                    <MenuButton
-                      as={Button}
-                      w="200px"
-                      bg="rgba(50, 50, 55, 0.8)"
-                      color="white"
-                      rightIcon={<ChevronDownIcon />}
-                      _hover={{ bg: "rgba(70, 70, 75, 0.8)" }}
-                      borderRadius="md"
-                      size="md"
-                    >
-                      {selectedStyle}
-                    </MenuButton>
-                    <MenuList
-                      bg="rgba(40, 40, 45, 0.9)"
-                      border="none"
-                      borderRadius="md"
-                      minW="120px"
-                    >
-                      {examStyles.map((style) => (
-                        <MenuItem
-                          key={style}
-                          onClick={() => setSelectedStyle(style)}
-                          bg="transparent"
-                          _hover={{ bg: "rgba(60, 60, 65, 0.8)" }}
-                          fontSize="sm"
+                    <HStack w="full" spacing={2} flexWrap="wrap" justify="center">
+                      <Menu>
+                        <MenuButton
+                          as={Button}
+                          w={{ base: "full", sm: "150px", md: "200px" }}
+                          bg="rgba(50, 50, 55, 0.8)"
+                          color="white"
+                          rightIcon={<ChevronDownIcon />}
+                          _hover={{ bg: "rgba(70, 70, 75, 0.8)" }}
+                          borderRadius="md"
+                          size={buttonSize}
                         >
-                          {style}
-                        </MenuItem>
-                      ))}
-                    </MenuList>
-                  </Menu>
-                )}
+                          {selectedExam}
+                        </MenuButton>
+                        <MenuList
+                          bg="rgba(40, 40, 45, 0.9)"
+                          border="none"
+                          borderRadius="md"
+                          minW={{ base: "100px", md: "120px" }}
+                        >
+                          {exams.map((exam) => (
+                            <MenuItem
+                              key={exam}
+                              onClick={() => setSelectedExam(exam)}
+                              bg="transparent"
+                              _hover={{ bg: "rgba(60, 60, 65, 0.8)" }}
+                              fontSize={{ base: "xs", md: "sm" }}
+                            >
+                              {exam}
+                            </MenuItem>
+                          ))}
+                        </MenuList>
+                      </Menu>
+                      {selectedExam !== "Select Exam" && (
+                        <Menu>
+                          <MenuButton
+                            as={Button}
+                            w={{ base: "full", sm: "150px", md: "200px" }}
+                            bg="rgba(50, 50, 55, 0.8)"
+                            color="white"
+                            rightIcon={<ChevronDownIcon />}
+                            _hover={{ bg: "rgba(70, 70, 75, 0.8)" }}
+                            borderRadius="md"
+                            size={buttonSize}
+                          >
+                            {selectedStyle}
+                          </MenuButton>
+                          <MenuList
+                            bg="rgba(40, 40, 45, 0.9)"
+                            border="none"
+                            borderRadius="md"
+                            minW={{ base: "100px", md: "120px" }}
+                          >
+                            {examStyles.map((style) => (
+                              <MenuItem
+                                key={style}
+                                onClick={() => setSelectedStyle(style)}
+                                bg="transparent"
+                                _hover={{ bg: "rgba(60, 60, 65, 0.8)" }}
+                                fontSize={{ base: "xs", md: "sm" }}
+                              >
+                                {style}
+                              </MenuItem>
+                            ))}
+                          </MenuList>
+                        </Menu>
+                      )}
+                    </HStack>
+                  )}
+                </VStack>
               </VStack>
 
               {/* Live User Stats */}
@@ -916,14 +933,14 @@ const DashboardPage: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 bg="rgba(40, 40, 45, 0.9)"
                 borderRadius="xl"
-                p={4}
+                p={padding}
                 boxShadow="0 8px 32px rgba(0, 0, 0, 0.5)"
                 border="2px dashed #ffdd57"
                 textAlign="center"
                 mb={6}
               >
                 <Text
-                  fontSize="lg"
+                  fontSize={{ base: "md", md: "lg" }}
                   fontWeight="bold"
                   bgGradient="linear(to-r, white, #ffdd57)"
                   bgClip="text"
@@ -931,17 +948,17 @@ const DashboardPage: React.FC = () => {
                 >
                   VIKAL Live Stats 🌟
                 </Text>
-                <HStack justify="space-around" spacing={4}>
+                <HStack justify="space-around" spacing={{ base: 2, md: 4 }} flexWrap="wrap">
                   <VStack>
                     <MotionBox
                       animate={{ scale: [1, 1.1, 1], y: [0, -5, 0] }}
                       transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1.5 }}
                     >
-                      <Text fontSize="2xl" fontWeight="extrabold" color="#ffdd57">
+                      <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="extrabold" color="#ffdd57">
                         {stats.active_users}
                       </Text>
                     </MotionBox>
-                    <Text fontSize="sm" color="gray.400">
+                    <Text fontSize={{ base: "xs", md: "sm" }} color="gray.400">
                       Active Users
                     </Text>
                   </VStack>
@@ -950,11 +967,11 @@ const DashboardPage: React.FC = () => {
                       animate={{ scale: [1, 1.1, 1], y: [0, -5, 0] }}
                       transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1.5 }}
                     >
-                      <Text fontSize="2xl" fontWeight="extrabold" color="#ffdd57">
+                      <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="extrabold" color="#ffdd57">
                         {stats.questions_solved}
                       </Text>
                     </MotionBox>
-                    <Text fontSize="sm" color="gray.400">
+                    <Text fontSize={{ base: "xs", md: "sm" }} color="gray.400">
                       Questions Solved
                     </Text>
                   </VStack>
@@ -963,11 +980,11 @@ const DashboardPage: React.FC = () => {
                       animate={{ scale: [1, 1.1, 1], y: [0, -5, 0] }}
                       transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1.5 }}
                     >
-                      <Text fontSize="2xl" fontWeight="extrabold" color="#ffdd57">
+                      <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="extrabold" color="#ffdd57">
                         {stats.explanations_given}
                       </Text>
                     </MotionBox>
-                    <Text fontSize="sm" color="gray.400">
+                    <Text fontSize={{ base: "xs", md: "sm" }} color="gray.400">
                       Explanations Given
                     </Text>
                   </VStack>
@@ -980,14 +997,14 @@ const DashboardPage: React.FC = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     bgGradient="linear(to-br, #ffdd57, #ffd700)"
-                    p={6}
+                    p={padding}
                     borderRadius="xl"
                     boxShadow="0 8px 32px rgba(0, 0, 0, 0.5)"
                     border="1px solid rgba(255, 255, 255, 0.2)"
                     whileHover={{ scale: 1.02 }}
                   >
                     <HStack justify="space-between" mb={4}>
-                      <Text fontSize="lg" fontWeight="bold" color="#0a0a0c">
+                      <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color="#0a0a0c">
                         {isSolveMode ? "Solution Notes" : "Study Notes"} 🤓
                       </Text>
                       <Tooltip label={hasCopied ? "Copied!" : "Copy"} placement="top">
@@ -1002,7 +1019,7 @@ const DashboardPage: React.FC = () => {
                         />
                       </Tooltip>
                     </HStack>
-                    <Box fontSize="md" color="#0a0a0c" lineHeight="1.6" className="response-text">
+                    <Box fontSize={{ base: "sm", md: "md" }} color="#0a0a0c" lineHeight="1.6" className="response-text">
                       <ReactMarkdown>{responseData.notes}</ReactMarkdown>
                     </Box>
                   </MotionBox>
@@ -1013,13 +1030,13 @@ const DashboardPage: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       bg="rgba(30, 30, 35, 0.9)"
                       backdropFilter="blur(12px)"
-                      p={6}
+                      p={padding}
                       borderRadius="xl"
                       boxShadow="0 8px 32px rgba(0, 0, 0, 0.5)"
                       border="1px solid rgba(255, 221, 87, 0.2)"
                     >
                       <Text
-                        fontSize="lg"
+                        fontSize={{ base: "md", md: "lg" }}
                         fontWeight="bold"
                         bgGradient="linear(to-r, white, #ffdd57)"
                         bgClip="text"
@@ -1027,7 +1044,7 @@ const DashboardPage: React.FC = () => {
                       >
                         Points to Remember for Exam 📝
                       </Text>
-                      <Box fontSize="md" color="white" lineHeight="1.6" className="response-text">
+                      <Box fontSize={{ base: "sm", md: "md" }} color="white" lineHeight="1.6" className="response-text">
                         <ReactMarkdown>{responseData.examTips}</ReactMarkdown>
                       </Box>
                     </MotionBox>
@@ -1039,13 +1056,13 @@ const DashboardPage: React.FC = () => {
                       animate={{ opacity: 1, y: 0 }}
                       bg="rgba(30, 30, 35, 0.9)"
                       backdropFilter="blur(12px)"
-                      p={6}
+                      p={padding}
                       borderRadius="xl"
                       boxShadow="0 8px 32px rgba(0, 0, 0, 0.5)"
                       border="1px solid rgba(255, 221, 87, 0.2)"
                     >
                       <Text
-                        fontSize="lg"
+                        fontSize={{ base: "md", md: "lg" }}
                         fontWeight="bold"
                         bgGradient="linear(to-r, white, #ffdd57)"
                         bgClip="text"
@@ -1074,8 +1091,8 @@ const DashboardPage: React.FC = () => {
                           return (
                             <MotionBox
                               key={idx}
-                              w="220px"
-                              h="160px"
+                              w={{ base: "180px", md: "220px" }}
+                              h={{ base: "120px", md: "160px" }}
                               bgGradient={bgGradient}
                               borderRadius="lg"
                               boxShadow="0 6px 16px rgba(0, 0, 0, 0.3)"
@@ -1098,7 +1115,12 @@ const DashboardPage: React.FC = () => {
                                   p={4}
                                   css={{ backfaceVisibility: "hidden" }}
                                 >
-                                  <Text fontSize="sm" color="white" textAlign="center" fontWeight="bold">
+                                  <Text
+                                    fontSize={{ base: "xs", md: "sm" }}
+                                    color="white"
+                                    textAlign="center"
+                                    fontWeight="bold"
+                                  >
                                     Q: {question}
                                   </Text>
                                 </Box>
@@ -1111,7 +1133,7 @@ const DashboardPage: React.FC = () => {
                                   p={4}
                                   css={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                                 >
-                                  <Text fontSize="sm" color="white" textAlign="center">
+                                  <Text fontSize={{ base: "xs", md: "sm" }} color="white" textAlign="center">
                                     A: {answer}
                                   </Text>
                                 </Box>
@@ -1128,13 +1150,13 @@ const DashboardPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     bg="rgba(30, 30, 35, 0.9)"
                     backdropFilter="blur(12px)"
-                    p={6}
+                    p={padding}
                     borderRadius="xl"
                     boxShadow="0 8px 32px rgba(0, 0, 0, 0.5)"
                     border="1px solid rgba(255, 221, 87, 0.2)"
                   >
                     <Text
-                      fontSize="lg"
+                      fontSize={{ base: "md", md: "lg" }}
                       fontWeight="bold"
                       bgGradient="linear(to-r, white, #ffdd57)"
                       bgClip="text"
@@ -1142,7 +1164,7 @@ const DashboardPage: React.FC = () => {
                     >
                       Resource Hub 📖
                     </Text>
-                    <VStack align="start" spacing={2} maxH="200px" overflowY="auto">
+                    <VStack align="start" spacing={2} maxH={{ base: "150px", md: "200px" }} overflowY="auto">
                       {responseData.resources.length > 0 ? (
                         responseData.resources.map((res, idx) => (
                           <Link
@@ -1150,14 +1172,14 @@ const DashboardPage: React.FC = () => {
                             href={res.url}
                             isExternal
                             color="gray.300"
-                            fontSize="sm"
+                            fontSize={{ base: "xs", md: "sm" }}
                             _hover={{ color: "#ffdd57", textDecoration: "underline" }}
                           >
                             {res.title} <ExternalLinkIcon mx="2px" />
                           </Link>
                         ))
                       ) : (
-                        <Text fontSize="sm" color="gray.500">
+                        <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500">
                           No resources available.
                         </Text>
                       )}
