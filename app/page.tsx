@@ -71,7 +71,7 @@ const Rocket = () => (
 // LandingPage component
 const LandingPage = () => {
   const router = useRouter();
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [_, setIsTransitioning] = useState(false); // Keep setter, unused variable fixed
   const [dots, setDots] = useState<{ x: number; y: number; key: string }[]>([]);
 
   useEffect(() => {
@@ -91,7 +91,6 @@ const LandingPage = () => {
   }, []);
 
   const handleGetStarted = () => {
-    setIsTransitioning(true);
     setTimeout(() => {
       router.push("/dashboard");
     }, 1000);
@@ -330,7 +329,6 @@ const LandingPage = () => {
                 p={6}
                 boxShadow="0 8px 20px rgba(0, 0, 0, 0.2)"
                 _hover={{ transform: "translateY(-5px)", boxShadow: "0 12px 30px rgba(0, 196, 180, 0.3)" }}
-                // Removed transition prop here
               >
                 <VStack spacing={4} align="start">
                   <Box>{feature.icon}</Box>
@@ -404,7 +402,6 @@ const LandingPage = () => {
                 borderRadius="md"
                 p={6}
                 _hover={{ bg: "rgba(30, 40, 60, 1)", transform: "translateY(-5px)" }}
-                // Removed transition prop here
               >
                 <Box mr={4}>{step.icon}</Box>
                 <VStack align="start" spacing={2}>
@@ -421,7 +418,7 @@ const LandingPage = () => {
 
           <Box mt={12} textAlign="center" py={6} borderTop="1px" borderBottom="1px" borderColor="rgba(255, 255, 255, 0.1)">
             <Text fontSize="xl" color="#E2E8F0" fontStyle="italic" fontFamily="Inter, sans-serif" opacity={0.9}>
-              "Education is not preparation for life; education is life itself."
+              &quot;Education is not preparation for life; education is life itself.&quot;
             </Text>
             <Text mt={2} color="#FF6B6B" fontFamily="Inter, sans-serif">
               - John Dewey
@@ -486,7 +483,7 @@ const LandingPage = () => {
             fontFamily="Inter, sans-serif"
             opacity={0.85}
           >
-            "VIKAL – आपकी 🧠 AI तैयारी, आपकी 🏆 सफलता!"
+            &quot;VIKAL – आपकी 🧠 AI तैयारी, आपकी 🏆 सफलता!&quot;
           </Text>
 
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8}>
@@ -533,7 +530,6 @@ const LandingPage = () => {
                 p={6}
                 boxShadow="0 8px 20px rgba(0, 0, 0, 0.2)"
                 _hover={{ transform: "translateY(-5px)", boxShadow: "0 12px 30px rgba(0, 196, 180, 0.3)" }}
-                // Removed transition prop here
               >
                 <VStack spacing={4} align="start">
                   <Box>{benefit.icon}</Box>
