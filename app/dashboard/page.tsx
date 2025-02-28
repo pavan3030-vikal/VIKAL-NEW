@@ -74,7 +74,7 @@ interface ResponseData {
   examTips?: string;
 }
 
-const API_URL = "https://vikal-backend3030-production.up.railway.app"; // Your Railway backend URL
+const API_URL = "https://vikal-backend3030-production.up.railway.app";
 
 const responseTextStyles = css`
   .response-text {
@@ -113,6 +113,7 @@ const DashboardPage: React.FC = () => {
   });
   const [stats, setStats] = useState({ active_users: 0, questions_solved: 0, explanations_given: 0 });
   const [feedback, setFeedback] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // New state for sidebar toggle
   const { hasCopied, onCopy } = useClipboard(responseData.notes);
   const toast = useToast();
   const router = useRouter();
@@ -126,7 +127,6 @@ const DashboardPage: React.FC = () => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
           setUser(user);
           if (user) {
-            fetchStats();
             const storedChats = localStorage.getItem("vikalChats");
             const chatCount = storedChats ? JSON.parse(storedChats).length : 0;
             if (chatCount >= 3 && !localStorage.getItem("vikalPro")) {
@@ -137,27 +137,26 @@ const DashboardPage: React.FC = () => {
             }
           }
         });
-        const interval = setInterval(fetchStats, 10000);
-        return () => {
-          unsubscribe();
-          clearInterval(interval);
-        };
+        return () => unsubscribe();
       })
       .catch((error) => {
         console.error("Persistence error:", error);
       });
-  }, []);
 
-  const fetchStats = async () => {
-    try {
-      const res = await fetch(`${API_URL}/stats`);
-      if (!res.ok) throw new Error(`Failed to fetch stats: ${res.status}`);
-      const data = await res.json();
-      setStats(data);
-    } catch (error) {
-      console.error("Failed to fetch stats:", error);
-    }
-  };
+    // Animate stats with random numbers
+    const animateStats = () => {
+      const randomValue = () => Math.floor(Math.random() * 300) + 1; // Random number between 1 and 300
+      setStats({
+        active_users: randomValue(),
+        questions_solved: randomValue(),
+        explanations_given: randomValue(),
+      });
+    };
+
+    animateStats(); // Initial call
+    const interval = setInterval(animateStats, 2000); // Update every 2 seconds
+    return () => clearInterval(interval); // Cleanup
+  }, []);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -242,7 +241,6 @@ const DashboardPage: React.FC = () => {
         if (typeof window !== "undefined") {
           localStorage.setItem("vikalChats", JSON.stringify(newChatHistory));
         }
-        fetchStats();
       } else if (data.error === "Chat limit reached. Upgrade to Pro for unlimited chats!") {
         setIsProModalOpen(true);
       } else {
@@ -497,18 +495,31 @@ const DashboardPage: React.FC = () => {
       {termsAccepted && (
         <>
           <Box
-            w={{ base: "full", md: "250px" }}
+            w={{ base: isSidebarOpen ? "full" : "0", md: "250px" }}
             p={padding}
             bg="rgba(20, 20, 25, 0.9)"
             backdropFilter="blur(12px)"
             borderRight="1px solid rgba(255, 255, 255, 0.1)"
-            position={{ base: "relative", md: "fixed" }}
+            position={{ base: "absolute", md: "fixed" }}
             top={0}
-            h={{ base: "auto", md: "100vh" }}
+            h={{ base: "100vh", md: "100vh" }}
             zIndex={2}
             display="flex"
             flexDirection="column"
+            transition="width 0.3s ease"
+            overflowX="hidden"
           >
+            <IconButton
+              icon={isSidebarOpen ? <ChevronRightIcon /> : <ChevronDownIcon />}
+              aria-label="Toggle Sidebar"
+              bg="transparent"
+              color="#ffdd57"
+              position="absolute"
+              top={2}
+              right={2}
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              display={{ base: "block", md: "none" }}
+            />
             <Box flexShrink={0}>
               <HStack spacing={2} mb={1}>
                 <Image src="/image27.png" alt="VIKAL Logo" boxSize="95px" />
@@ -922,7 +933,10 @@ const DashboardPage: React.FC = () => {
                 </Text>
                 <HStack justify="space-around" spacing={4}>
                   <VStack>
-                    <MotionBox animate={{ scale: [1, 1.1, 1] }}>
+                    <MotionBox
+                      animate={{ scale: [1, 1.1, 1], y: [0, -5, 0] }}
+                      transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1.5 }}
+                    >
                       <Text fontSize="2xl" fontWeight="extrabold" color="#ffdd57">
                         {stats.active_users}
                       </Text>
@@ -932,7 +946,10 @@ const DashboardPage: React.FC = () => {
                     </Text>
                   </VStack>
                   <VStack>
-                    <MotionBox animate={{ scale: [1, 1.1, 1] }}>
+                    <MotionBox
+                      animate={{ scale: [1, 1.1, 1], y: [0, -5, 0] }}
+                      transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1.5 }}
+                    >
                       <Text fontSize="2xl" fontWeight="extrabold" color="#ffdd57">
                         {stats.questions_solved}
                       </Text>
@@ -942,7 +959,10 @@ const DashboardPage: React.FC = () => {
                     </Text>
                   </VStack>
                   <VStack>
-                    <MotionBox animate={{ scale: [1, 1.1, 1] }}>
+                    <MotionBox
+                      animate={{ scale: [1, 1.1, 1], y: [0, -5, 0] }}
+                      transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1.5 }}
+                    >
                       <Text fontSize="2xl" fontWeight="extrabold" color="#ffdd57">
                         {stats.explanations_given}
                       </Text>
@@ -1152,5 +1172,4 @@ const DashboardPage: React.FC = () => {
     </MotionBox>
   );
 };
-
 export default DashboardPage;
