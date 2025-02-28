@@ -550,7 +550,6 @@ const DashboardPage: React.FC = () => {
                   <Text fontSize={{ base: "xs", md: "sm" }} color="#ffdd57">
                     Summarize YouTube
                   </Text>
-                  <ChevronRightIcon color="#ffdd57" />
                 </HStack>
               </MotionBox>
               <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium" color="gray.300">

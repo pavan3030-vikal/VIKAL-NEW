@@ -15,7 +15,7 @@ import {
   ButtonProps,
   BoxProps,
 } from "@chakra-ui/react";
-import { ChevronRightIcon, InfoIcon } from "@chakra-ui/icons";
+import { InfoIcon } from "@chakra-ui/icons";
 import { motion, MotionProps } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { CSSProperties } from "react";
@@ -198,7 +198,7 @@ const LandingPage = () => {
               fontFamily="Inter, sans-serif"
               fontWeight="medium"
             >
-              VIKAL – AI-Powered Prep for UPSC, GATE & SSC! <ChevronRightIcon boxSize={6} color="#FF6B6B" /> Tailored Learning, Smarter Success.
+              VIKAL – AI-Powered Prep for UPSC, GATE & SSC! Tailored Learning, Smarter Success.
             </Text>
 
             <HStack spacing={6} justify="center">
@@ -308,7 +308,7 @@ const LandingPage = () => {
               {
                 title: "Innovative",
                 description: "Customized answers for your exam questions",
-                icon: <ChevronRightIcon boxSize={8} color="#FF6B6B" />,
+                icon: null, // Removed ChevronRightIcon
               },
               {
                 title: "Comprehensive",
@@ -329,7 +329,7 @@ const LandingPage = () => {
                 _hover={{ transform: "translateY(-5px)", boxShadow: "0 12px 30px rgba(0, 196, 180, 0.3)" }}
               >
                 <VStack spacing={4} align="start">
-                  <Box>{feature.icon}</Box>
+                  {feature.icon && <Box>{feature.icon}</Box>}
                   <Heading as="h3" size="lg" color="#E2E8F0" fontFamily="DM Sans, sans-serif">
                     {feature.title}
                   </Heading>
@@ -368,7 +368,7 @@ const LandingPage = () => {
           <Grid templateColumns={{ base: "1fr" }} gap={10}>
             {[
               {
-                icon: <ChevronRightIcon boxSize={8} color="#FF6B6B" />,
+                icon: null, // Removed ChevronRightIcon
                 title: "Identify Your Path",
                 description: "Identify your exam and subjects to focus on for tailored preparation.",
               },
@@ -378,7 +378,7 @@ const LandingPage = () => {
                 description: "Access customized resources and practice questions designed for your specific exam.",
               },
               {
-                icon: <ChevronRightIcon boxSize={8} color="#FF6B6B" />,
+                icon: null, // Removed ChevronRightIcon
                 title: "Video Learning",
                 description: "Utilize our YouTube summarizer for quick topic reviews and video insights.",
               },
@@ -401,7 +401,7 @@ const LandingPage = () => {
                 p={6}
                 _hover={{ bg: "rgba(30, 40, 60, 1)", transform: "translateY(-5px)" }}
               >
-                <Box mr={4}>{step.icon}</Box>
+                {step.icon && <Box mr={4}>{step.icon}</Box>}
                 <VStack align="start" spacing={2}>
                   <Heading as="h3" size="md" color="#E2E8F0" fontFamily="DM Sans, sans-serif">
                     {step.title}
@@ -416,7 +416,7 @@ const LandingPage = () => {
 
           <Box mt={12} textAlign="center" py={6} borderTop="1px" borderBottom="1px" borderColor="rgba(255, 255, 255, 0.1)">
             <Text fontSize="xl" color="#E2E8F0" fontStyle="italic" fontFamily="Inter, sans-serif" opacity={0.9}>
-              &quot;Education is not preparation for life; education is life itself.&quot;
+              "Education is not preparation for life; education is life itself."
             </Text>
             <Text mt={2} color="#FF6B6B" fontFamily="Inter, sans-serif">
               - John Dewey
@@ -481,13 +481,13 @@ const LandingPage = () => {
             fontFamily="Inter, sans-serif"
             opacity={0.85}
           >
-            &quot;VIKAL – आपकी 🧠 AI तैयारी, आपकी 🏆 सफलता!&quot;
+            "VIKAL – आपकी 🧠 AI तैयारी, आपकी 🏆 सफलता!"
           </Text>
 
           <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={8}>
             {[
               {
-                icon: <ChevronRightIcon boxSize={8} color="#FF6B6B" />,
+                icon: null, // Removed ChevronRightIcon
                 title: "Personalized Learning",
                 description: "Tailored solutions for your specific exam needs.",
               },
@@ -497,7 +497,7 @@ const LandingPage = () => {
                 description: "Access a wide range of study materials and practice questions.",
               },
               {
-                icon: <ChevronRightIcon boxSize={8} color="#FF6B6B" />,
+                icon: null, // Removed ChevronRightIcon
                 title: "Progress Tracking",
                 description: "Monitor your progress and adjust your study plan accordingly.",
               },
@@ -507,7 +507,7 @@ const LandingPage = () => {
                 description: "Quickly review topics with our YouTube video summarizer.",
               },
               {
-                icon: <ChevronRightIcon boxSize={8} color="#FF6B6B" />,
+                icon: null, // Removed ChevronRightIcon
                 title: "AI-Powered Insights",
                 description: "Get instant feedback and insights to improve your performance.",
               },
@@ -530,7 +530,7 @@ const LandingPage = () => {
                 _hover={{ transform: "translateY(-5px)", boxShadow: "0 12px 30px rgba(0, 196, 180, 0.3)" }}
               >
                 <VStack spacing={4} align="start">
-                  <Box>{benefit.icon}</Box>
+                  {benefit.icon && <Box>{benefit.icon}</Box>}
                   <Heading as="h3" size="md" color="#E2E8F0" fontFamily="DM Sans, sans-serif">
                     {benefit.title}
                   </Heading>
