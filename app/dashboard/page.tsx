@@ -75,7 +75,7 @@ interface ResponseData {
   examTips?: string;
 }
 
-const API_URL = "https://vikal-backend3030-production.up.railway.app";
+const API_URL = "https://vikalnew2-production.up.railway.app/";
 
 const responseTextStyles = css`
   .response-text {
