@@ -114,7 +114,7 @@ const DashboardPage: React.FC = () => {
   });
   const [stats, setStats] = useState({ active_users: 0, questions_solved: 0, explanations_given: 0 });
   const [feedback, setFeedback] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar closed by default
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar starts open on all devices
   const { hasCopied, onCopy } = useClipboard(responseData.notes);
   const toast = useToast();
   const router = useRouter();
@@ -503,12 +503,12 @@ const DashboardPage: React.FC = () => {
         <>
           {/* Sidebar */}
           <Box
-            w={{ base: isSidebarOpen ? sidebarWidth : "0", md: sidebarWidth }}
+            w={isSidebarOpen ? sidebarWidth : "0"}
             p={padding}
             bg="rgba(20, 20, 25, 0.9)"
             backdropFilter="blur(12px)"
             borderRight="1px solid rgba(255, 255, 255, 0.1)"
-            position={{ base: "fixed", md: "fixed" }}
+            position="fixed"
             top={0}
             h="100vh"
             zIndex={10}
@@ -516,7 +516,7 @@ const DashboardPage: React.FC = () => {
             flexDirection="column"
             transition="width 0.3s ease"
             overflowX="hidden"
-            boxShadow={{ base: isSidebarOpen ? "lg" : "none", md: "none" }}
+            boxShadow={isSidebarOpen ? "lg" : "none"}
           >
             <HStack justify="space-between" mb={4}>
               <HStack spacing={2}>
@@ -528,7 +528,6 @@ const DashboardPage: React.FC = () => {
                 bg="transparent"
                 color="#ffdd57"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                display={{ base: "block", md: "none" }}
                 size="sm"
               />
             </HStack>
@@ -607,28 +606,11 @@ const DashboardPage: React.FC = () => {
           {/* Main Content */}
           <Box
             flex={1}
-            ml={{ base: 0, md: sidebarWidth }}
+            ml={{ md: isSidebarOpen ? sidebarWidth : "0" }}
             p={padding}
-            mt={{ base: isSidebarOpen ? "100vh" : 0, md: 0 }}
-            transition="margin-top 0.3s ease"
+            transition="margin-left 0.3s ease"
             zIndex={1}
           >
-            {/* Sidebar Toggle Button for Mobile */}
-            <IconButton
-              icon={<HamburgerIcon />}
-              aria-label="Open Sidebar"
-              bg="#ffdd57"
-              color="#0a0a0c"
-              rounded="full"
-              position="fixed"
-              top={padding}
-              left={padding}
-              onClick={() => setIsSidebarOpen(true)}
-              display={{ base: isSidebarOpen ? "none" : "block", md: "none" }}
-              zIndex={11}
-              size="md"
-            />
-
             {showTrialEndPopup && (
               <MotionBox
                 position="fixed"
