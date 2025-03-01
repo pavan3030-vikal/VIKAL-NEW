@@ -18,7 +18,7 @@ import { motion } from "framer-motion";
 
 const MotionBox = motion(Box);
 
-const API_URL = "https://vikal-backend3030-production.up.railway.app";
+const API_URL = "https://vikalnew2-production.up.railway.app/";
 
 const SummarizePage: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState("");
