@@ -70,9 +70,9 @@ interface ChatHistory {
 
 interface ResponseData {
   notes: string;
-  flashcards?: { question: string; answer: string }[];
+  flashcards?: string[];
   resources: { title: string; url: string }[];
-  points_to_remember?: string[];
+  examTips?: string;
 }
 
 const API_URL = "https://vikal-new-production.up.railway.app/"; // Updated to match your deployed backend
@@ -114,11 +114,13 @@ const DashboardPage: React.FC = () => {
   });
   const [stats, setStats] = useState({ active_users: 0, questions_solved: 0, explanations_given: 0 });
   const [feedback, setFeedback] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar starts open
+
   const { hasCopied, onCopy } = useClipboard(responseData.notes);
   const toast = useToast();
   const router = useRouter();
 
+  // Responsive values
   const padding = useBreakpointValue({ base: 2, sm: 3, md: 6 });
   const fontSize = useBreakpointValue({ base: "xl", sm: "2xl", md: "4xl" });
   const sidebarWidth = useBreakpointValue({ base: "70%", sm: "50%", md: "250px" });
@@ -227,11 +229,13 @@ const DashboardPage: React.FC = () => {
       const data = await res.json();
       console.log("API Response:", data);
       if (data.notes) {
+        const examTipsPrompt = `Given this ${isSolveMode ? "solution" : "explanation"}: ${data.notes}, provide 3-5 key points to remember for an exam.`;
+        const examTips = await call_openai(examTipsPrompt, 100);
         setResponseData({
           notes: data.notes || "No notes provided.",
           flashcards: data.flashcards || [],
           resources: data.resources || [],
-          points_to_remember: data.points_to_remember || [],
+          examTips: examTips || "No exam tips generated.",
         });
         const newChatHistory = [
           {
@@ -293,6 +297,15 @@ const DashboardPage: React.FC = () => {
 
   const handlePageTransition = (path: string) => {
     router.push(path);
+  };
+
+  const call_openai = async (prompt: string, max_tokens: number) => {
+    return new Promise((resolve) =>
+      setTimeout(
+        () => resolve("Sample exam tips: 1. Focus on key concepts. 2. Practice steps. 3. Memorize formulas."),
+        500
+      )
+    ) as Promise<string>;
   };
 
   const exams = ["UPSC", "GATE", "RRB"];
@@ -426,6 +439,7 @@ const DashboardPage: React.FC = () => {
         opacity={0.3}
       />
 
+      {/* Terms and Conditions Modal */}
       <Modal isOpen={!termsAccepted && !!user} onClose={() => {}} isCentered closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent bg="rgba(20, 20, 25, 0.9)" color="white" borderRadius="xl" maxW={{ base: "90%", md: "md" }}>
@@ -490,14 +504,33 @@ const DashboardPage: React.FC = () => {
         </ModalContent>
       </Modal>
 
+      {/* Dashboard content */}
       {termsAccepted && (
         <>
+          {/* Sidebar Toggle Button (Visible when sidebar is closed on mobile) */}
+          {!isSidebarOpen && (
+            <IconButton
+              icon={<HamburgerIcon />}
+              aria-label="Open Sidebar"
+              bg="transparent"
+              color="#ffdd57"
+              position="fixed"
+              top={2}
+              left={2}
+              zIndex={11}
+              onClick={() => setIsSidebarOpen(true)}
+              size="md"
+              display={{ base: "block", md: "none" }} // Only on mobile
+            />
+          )}
+
+          {/* Sidebar */}
           <Box
             w={isSidebarOpen ? sidebarWidth : "0"}
             p={padding}
             bg="rgba(20, 20, 25, 0.9)"
             backdropFilter="blur(12px)"
-            borderRight="1px solid rgba(255, 255, 255, 0.1)"
+            borderRight={{ base: "none", md: "1px solid rgba(255, 255, 255, 0.1)" }} // No border on mobile
             position="fixed"
             top={0}
             h="100vh"
@@ -506,22 +539,29 @@ const DashboardPage: React.FC = () => {
             flexDirection="column"
             transition="width 0.3s ease"
             overflowX="hidden"
-            boxShadow={isSidebarOpen ? "lg" : "none"}
+            boxShadow={isSidebarOpen ? { base: "lg", md: "lg" } : "none"}
           >
             <HStack justify="space-between" mb={4}>
               <HStack spacing={2}>
-                <Image src="/image27.png" alt="VIKAL Logo" boxSize={{ base: "60px", md: "95px" }} />
+                <Image src="/image27.png" alt="VIKAL Logo" boxSize={{ base: "40px", md: "95px" }} /> {/* Smaller logo on mobile */}
               </HStack>
               <IconButton
-                icon={isSidebarOpen ? <CloseIcon /> : <HamburgerIcon />}
-                aria-label="Toggle Sidebar"
+                icon={<CloseIcon />}
+                aria-label="Close Sidebar"
                 bg="transparent"
                 color="#ffdd57"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                onClick={() => setIsSidebarOpen(false)}
                 size="sm"
               />
             </HStack>
-            <Text fontSize={{ base: "xs", md: "xs" }} color="gray.400" mb={4}>
+            <Text
+              fontSize={{ base: "xs", md: "xs" }}
+              color="gray.400"
+              mb={4}
+              whiteSpace="nowrap" // Prevent vertical stacking
+              overflow="hidden"
+              textOverflow="ellipsis"
+            >
               AI Tyari VIKAL
             </Text>
             <VStack spacing={4} align="stretch" flex={1} overflowY="auto">
@@ -592,6 +632,7 @@ const DashboardPage: React.FC = () => {
             </Box>
           </Box>
 
+          {/* Main Content */}
           <Box
             flex={1}
             ml={{ md: isSidebarOpen ? sidebarWidth : "0" }}
@@ -915,6 +956,7 @@ const DashboardPage: React.FC = () => {
                 </VStack>
               </VStack>
 
+              {/* Live User Stats */}
               <MotionBox
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -1011,7 +1053,7 @@ const DashboardPage: React.FC = () => {
                     </Box>
                   </MotionBox>
 
-                  {responseData.points_to_remember && responseData.points_to_remember.length > 0 && (
+                  {responseData.examTips && (
                     <MotionBox
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -1032,11 +1074,7 @@ const DashboardPage: React.FC = () => {
                         Points to Remember for Exam 📝
                       </Text>
                       <Box fontSize={{ base: "sm", md: "md" }} color="white" lineHeight="1.6" className="response-text">
-                        <ul>
-                          {responseData.points_to_remember.map((tip, idx) => (
-                            <li key={idx}>{tip}</li>
-                          ))}
-                        </ul>
+                        <ReactMarkdown>{responseData.examTips}</ReactMarkdown>
                       </Box>
                     </MotionBox>
                   )}
@@ -1071,6 +1109,7 @@ const DashboardPage: React.FC = () => {
                             "linear(to-br, #74c0fc, #4dabf7)",
                           ];
                           const bgGradient = colors[idx % colors.length];
+                          const [question, answer] = card.split(" - ") || [card, "No answer provided"];
                           const flipStyles = css`
                             transform-style: preserve-3d;
                             position: relative;
@@ -1111,7 +1150,7 @@ const DashboardPage: React.FC = () => {
                                     textAlign="center"
                                     fontWeight="bold"
                                   >
-                                    Q: {card.question}
+                                    Q: {question}
                                   </Text>
                                 </Box>
                                 <Box
@@ -1124,7 +1163,7 @@ const DashboardPage: React.FC = () => {
                                   css={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                                 >
                                   <Text fontSize={{ base: "xs", md: "sm" }} color="white" textAlign="center">
-                                    A: {card.answer}
+                                    A: {answer}
                                   </Text>
                                 </Box>
                               </Box>
