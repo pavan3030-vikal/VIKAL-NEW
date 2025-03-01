@@ -70,12 +70,12 @@ interface ChatHistory {
 
 interface ResponseData {
   notes: string;
-  flashcards?: string[];
+  flashcards?: { question: string; answer: string }[];
   resources: { title: string; url: string }[];
-  examTips?: string;
+  points_to_remember?: string[];
 }
 
-const API_URL = "https://vikalnew2-production.up.railway.app/";
+const API_URL = "https://vikal-new-production.up.railway.app/"; // Updated to match your deployed backend
 
 const responseTextStyles = css`
   .response-text {
@@ -114,12 +114,11 @@ const DashboardPage: React.FC = () => {
   });
   const [stats, setStats] = useState({ active_users: 0, questions_solved: 0, explanations_given: 0 });
   const [feedback, setFeedback] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar starts open on all devices
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { hasCopied, onCopy } = useClipboard(responseData.notes);
   const toast = useToast();
   const router = useRouter();
 
-  // Responsive values
   const padding = useBreakpointValue({ base: 2, sm: 3, md: 6 });
   const fontSize = useBreakpointValue({ base: "xl", sm: "2xl", md: "4xl" });
   const sidebarWidth = useBreakpointValue({ base: "70%", sm: "50%", md: "250px" });
@@ -148,7 +147,6 @@ const DashboardPage: React.FC = () => {
         console.error("Persistence error:", error);
       });
 
-    // Animate stats with random numbers
     const animateStats = () => {
       const randomValue = () => Math.floor(Math.random() * 300) + 1;
       setStats({
@@ -208,6 +206,12 @@ const DashboardPage: React.FC = () => {
 
       const endpoint = isSolveMode ? `${API_URL}/solve` : `${API_URL}/explain`;
       const payloadKey = isSolveMode ? "problem" : "topic";
+      const styleMapping: { [key: string]: string } = {
+        "Smart & Quick": "smart",
+        "Step-by-Step": "step",
+        "Teacher Mode": "teacher",
+        "Research Style": "research",
+      };
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -216,20 +220,18 @@ const DashboardPage: React.FC = () => {
           user_id: user?.uid,
           [payloadKey]: searchQuery,
           exam: selectedExam !== "Select Exam" && isSolveMode ? selectedExam.toLowerCase() : null,
-          explanation_style: isSolveMode ? selectedStyle.toLowerCase() : null,
+          explanation_style: isSolveMode ? styleMapping[selectedStyle] || selectedStyle.toLowerCase() : null,
         }),
       });
       if (!res.ok) throw new Error(`Server error: ${res.status} - ${await res.text()}`);
       const data = await res.json();
       console.log("API Response:", data);
       if (data.notes) {
-        const examTipsPrompt = `Given this ${isSolveMode ? "solution" : "explanation"}: ${data.notes}, provide 3-5 key points to remember for an exam.`;
-        const examTips = await call_openai(examTipsPrompt, 100);
         setResponseData({
           notes: data.notes || "No notes provided.",
           flashcards: data.flashcards || [],
           resources: data.resources || [],
-          examTips: examTips || "No exam tips generated.",
+          points_to_remember: data.points_to_remember || [],
         });
         const newChatHistory = [
           {
@@ -291,15 +293,6 @@ const DashboardPage: React.FC = () => {
 
   const handlePageTransition = (path: string) => {
     router.push(path);
-  };
-
-  const call_openai = async (prompt: string, max_tokens: number) => {
-    return new Promise((resolve) =>
-      setTimeout(
-        () => resolve("Sample exam tips: 1. Focus on key concepts. 2. Practice steps. 3. Memorize formulas."),
-        500
-      )
-    ) as Promise<string>;
   };
 
   const exams = ["UPSC", "GATE", "RRB"];
@@ -433,7 +426,6 @@ const DashboardPage: React.FC = () => {
         opacity={0.3}
       />
 
-      {/* Terms and Conditions Modal */}
       <Modal isOpen={!termsAccepted && !!user} onClose={() => {}} isCentered closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent bg="rgba(20, 20, 25, 0.9)" color="white" borderRadius="xl" maxW={{ base: "90%", md: "md" }}>
@@ -498,10 +490,8 @@ const DashboardPage: React.FC = () => {
         </ModalContent>
       </Modal>
 
-      {/* Dashboard content */}
       {termsAccepted && (
         <>
-          {/* Sidebar */}
           <Box
             w={isSidebarOpen ? sidebarWidth : "0"}
             p={padding}
@@ -602,7 +592,6 @@ const DashboardPage: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Main Content */}
           <Box
             flex={1}
             ml={{ md: isSidebarOpen ? sidebarWidth : "0" }}
@@ -926,7 +915,6 @@ const DashboardPage: React.FC = () => {
                 </VStack>
               </VStack>
 
-              {/* Live User Stats */}
               <MotionBox
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -1023,7 +1011,7 @@ const DashboardPage: React.FC = () => {
                     </Box>
                   </MotionBox>
 
-                  {responseData.examTips && (
+                  {responseData.points_to_remember && responseData.points_to_remember.length > 0 && (
                     <MotionBox
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -1044,7 +1032,11 @@ const DashboardPage: React.FC = () => {
                         Points to Remember for Exam 📝
                       </Text>
                       <Box fontSize={{ base: "sm", md: "md" }} color="white" lineHeight="1.6" className="response-text">
-                        <ReactMarkdown>{responseData.examTips}</ReactMarkdown>
+                        <ul>
+                          {responseData.points_to_remember.map((tip, idx) => (
+                            <li key={idx}>{tip}</li>
+                          ))}
+                        </ul>
                       </Box>
                     </MotionBox>
                   )}
@@ -1079,7 +1071,6 @@ const DashboardPage: React.FC = () => {
                             "linear(to-br, #74c0fc, #4dabf7)",
                           ];
                           const bgGradient = colors[idx % colors.length];
-                          const [question, answer] = card.split(" - ") || [card, "No answer provided"];
                           const flipStyles = css`
                             transform-style: preserve-3d;
                             position: relative;
@@ -1120,7 +1111,7 @@ const DashboardPage: React.FC = () => {
                                     textAlign="center"
                                     fontWeight="bold"
                                   >
-                                    Q: {question}
+                                    Q: {card.question}
                                   </Text>
                                 </Box>
                                 <Box
@@ -1133,7 +1124,7 @@ const DashboardPage: React.FC = () => {
                                   css={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
                                 >
                                   <Text fontSize={{ base: "xs", md: "sm" }} color="white" textAlign="center">
-                                    A: {answer}
+                                    A: {card.answer}
                                   </Text>
                                 </Box>
                               </Box>
@@ -1193,4 +1184,5 @@ const DashboardPage: React.FC = () => {
     </MotionBox>
   );
 };
+
 export default DashboardPage;
