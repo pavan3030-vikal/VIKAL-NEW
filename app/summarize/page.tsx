@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -15,6 +15,9 @@ import {
 import { ChevronLeftIcon, LinkIcon } from "@chakra-ui/icons";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
+import { auth } from "../lib/firebase"; // Ensure this path matches your setup
+import { User } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 const MotionBox = motion(Box);
 
@@ -28,25 +31,51 @@ const SummarizePage: React.FC = () => {
   const [chatQuery, setChatQuery] = useState("");
   const [chatResponse, setChatResponse] = useState("");
   const [videoId, setVideoId] = useState("");
+  const [user, setUser] = useState<User | null>(null);
   const toast = useToast();
+  const router = useRouter();
 
-  // Handle summarization
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      if (!currentUser) {
+        router.push("/dashboard");
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
   const handleSummarize = async () => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Please sign in to use this feature",
+        status: "error",
+        duration: 3000,
+        position: "top-right",
+      });
+      router.push("/dashboard");
+      return;
+    }
+
     setIsLoading(true);
     setSummary("");
     setResources([]);
-    setChatResponse(""); // Clear previous chat response
+    setChatResponse("");
     try {
       const res = await fetch(`${API_URL}/summarize-youtube`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ video_id: videoId, query: chatQuery }),
+        body: JSON.stringify({
+          user_id: user.uid,
+          videoUrl,
+        }),
       });
       if (!res.ok) throw new Error(`Server error: ${res.status} - ${await res.text()}`);
       const data = await res.json();
       if (data.summary) {
         setSummary(data.summary);
-        setVideoId(data.video_id); // Store video_id for chat
+        setVideoId(data.video_id);
         setResources(data.resources || []);
       } else {
         throw new Error(data.error || "No summary returned");
@@ -65,8 +94,19 @@ const SummarizePage: React.FC = () => {
     }
   };
 
-  // Handle chat with video
   const handleChat = async () => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Please sign in to use this feature",
+        status: "error",
+        duration: 3000,
+        position: "top-right",
+      });
+      router.push("/dashboard");
+      return;
+    }
+
     if (!videoId || !chatQuery) {
       toast({
         title: "Error",
@@ -81,9 +121,13 @@ const SummarizePage: React.FC = () => {
       const res = await fetch(`${API_URL}/chat-youtube`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ video_id: videoId, query: chatQuery }),
+        body: JSON.stringify({
+          user_id: user.uid,
+          video_id: videoId,
+          query: chatQuery,
+        }),
       });
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      if (!res.ok) throw new Error(`Server error: ${res.status} - ${await res.text()}`);
       const data = await res.json();
       if (data.response) {
         setChatResponse(data.response);
