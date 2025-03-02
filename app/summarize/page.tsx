@@ -40,7 +40,7 @@ const SummarizePage: React.FC = () => {
       const res = await fetch(`${API_URL}/summarize-youtube`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ videoUrl }),
+        body: JSON.stringify({ video_id: videoId, query: chatQuery }),
       });
       if (!res.ok) throw new Error(`Server error: ${res.status} - ${await res.text()}`);
       const data = await res.json();
