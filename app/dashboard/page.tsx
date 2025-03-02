@@ -75,7 +75,7 @@ interface ResponseData {
   examTips?: string;
 }
 
-const API_URL = "https://vikalnew2-production.up.railway.app/"; // Updated to match your deployed backend
+const API_URL = "https://vikalnew2-production.up.railway.app/";
 
 const responseTextStyles = css`
   .response-text {
@@ -132,7 +132,6 @@ const DashboardPage: React.FC = () => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
           setUser(user);
           if (user) {
-            // Fetch user status from backend
             try {
               const res = await fetch(`${API_URL}/user-status?user_id=${user.uid}`, {
                 method: "GET",
@@ -142,13 +141,11 @@ const DashboardPage: React.FC = () => {
               const data = await res.json();
               const { chatCount, isPro } = data;
 
-              // Set chat history from localStorage
               const storedChats = localStorage.getItem("vikalChats");
               if (storedChats) {
                 setChatHistory(JSON.parse(storedChats).slice(0, 3));
               }
 
-              // Show trial end popup if chat limit reached and not Pro
               if (chatCount >= 3 && !isPro) {
                 setShowTrialEndPopup(true);
               } else if (isPro) {
@@ -226,7 +223,7 @@ const DashboardPage: React.FC = () => {
     try {
       const endpoint = isSolveMode ? `${API_URL}/solve` : `${API_URL}/explain`;
       const payloadKey = isSolveMode ? "problem" : "topic";
-      const styleMapping = {
+      const styleMapping: { [key: string]: string } = {
         "Smart & Quick": "smart",
         "Step-by-Step": "step",
         "Teacher Mode": "teacher",
@@ -240,7 +237,7 @@ const DashboardPage: React.FC = () => {
           user_id: user?.uid,
           [payloadKey]: searchQuery,
           exam: selectedExam !== "Select Exam" && isSolveMode ? selectedExam.toLowerCase() : null,
-          explanation_style: isSolveMode ? styleMapping[selectedStyle] || selectedStyle.toLowerCase() : null,
+          explanation_style: isSolveMode ? (styleMapping[selectedStyle] ?? selectedStyle.toLowerCase()) : null,
         }),
       });
       if (!res.ok) {
@@ -459,7 +456,6 @@ const DashboardPage: React.FC = () => {
         opacity={0.3}
       />
 
-      {/* Terms and Conditions Modal */}
       <Modal isOpen={!termsAccepted && !!user} onClose={() => {}} isCentered closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent bg="rgba(20, 20, 25, 0.9)" color="white" borderRadius="xl" maxW={{ base: "90%", md: "md" }}>
@@ -524,10 +520,8 @@ const DashboardPage: React.FC = () => {
         </ModalContent>
       </Modal>
 
-      {/* Dashboard content */}
       {termsAccepted && (
         <>
-          {/* Sidebar Toggle Button (Visible when sidebar is closed on mobile) */}
           {!isSidebarOpen && (
             <IconButton
               icon={<HamburgerIcon />}
@@ -540,17 +534,16 @@ const DashboardPage: React.FC = () => {
               zIndex={11}
               onClick={() => setIsSidebarOpen(true)}
               size="md"
-              display={{ base: "block", md: "none" }} // Only on mobile
+              display={{ base: "block", md: "none" }}
             />
           )}
 
-          {/* Sidebar */}
           <Box
             w={isSidebarOpen ? sidebarWidth : "0"}
             p={padding}
             bg="rgba(20, 20, 25, 0.9)"
             backdropFilter="blur(12px)"
-            borderRight={{ base: "none", md: "1px solid rgba(255, 255, 255, 0.1)" }} // No border on mobile
+            borderRight={{ base: "none", md: "1px solid rgba(255, 255, 255, 0.1)" }}
             position="fixed"
             top={0}
             h="100vh"
@@ -563,7 +556,7 @@ const DashboardPage: React.FC = () => {
           >
             <HStack justify="space-between" mb={4}>
               <HStack spacing={2}>
-                <Image src="/image27.png" alt="VIKAL Logo" boxSize={{ base: "40px", md: "95px" }} /> {/* Smaller logo on mobile */}
+                <Image src="/image27.png" alt="VIKAL Logo" boxSize={{ base: "40px", md: "95px" }} />
               </HStack>
               <IconButton
                 icon={<CloseIcon />}
@@ -578,7 +571,7 @@ const DashboardPage: React.FC = () => {
               fontSize={{ base: "xs", md: "xs" }}
               color="gray.400"
               mb={4}
-              whiteSpace="nowrap" // Prevent vertical stacking
+              whiteSpace="nowrap"
               overflow="hidden"
               textOverflow="ellipsis"
             >
@@ -652,7 +645,6 @@ const DashboardPage: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Main Content */}
           <Box
             flex={1}
             ml={{ md: isSidebarOpen ? sidebarWidth : "0" }}
@@ -714,7 +706,7 @@ const DashboardPage: React.FC = () => {
                   </MotionBox>
                   <Text
                     fontSize="xs"
-                    color="gray.500"
+                    color="grey"
                     cursor="pointer"
                     onClick={() => setShowTrialEndPopup(false)}
                   >
@@ -976,7 +968,6 @@ const DashboardPage: React.FC = () => {
                 </VStack>
               </VStack>
 
-              {/* Live User Stats */}
               <MotionBox
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
