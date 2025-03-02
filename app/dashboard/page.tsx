@@ -114,13 +114,12 @@ const DashboardPage: React.FC = () => {
   });
   const [stats, setStats] = useState({ active_users: 0, questions_solved: 0, explanations_given: 0 });
   const [feedback, setFeedback] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar starts open
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const { hasCopied, onCopy } = useClipboard(responseData.notes);
   const toast = useToast();
   const router = useRouter();
 
-  // Responsive values
   const padding = useBreakpointValue({ base: 2, sm: 3, md: 6 });
   const fontSize = useBreakpointValue({ base: "xl", sm: "2xl", md: "4xl" });
   const sidebarWidth = useBreakpointValue({ base: "70%", sm: "50%", md: "250px" });
@@ -130,16 +129,40 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     setPersistence(auth, browserLocalPersistence)
       .then(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
           setUser(user);
           if (user) {
-            const storedChats = localStorage.getItem("vikalChats");
-            const chatCount = storedChats ? JSON.parse(storedChats).length : 0;
-            if (chatCount >= 3 && !localStorage.getItem("vikalPro")) {
-              setShowTrialEndPopup(true);
-            }
-            if (storedChats) {
-              setChatHistory(JSON.parse(storedChats).slice(0, 3));
+            // Fetch user status from backend
+            try {
+              const res = await fetch(`${API_URL}/user-status?user_id=${user.uid}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+              });
+              if (!res.ok) throw new Error(`Server error: ${res.status}`);
+              const data = await res.json();
+              const { chatCount, isPro } = data;
+
+              // Set chat history from localStorage
+              const storedChats = localStorage.getItem("vikalChats");
+              if (storedChats) {
+                setChatHistory(JSON.parse(storedChats).slice(0, 3));
+              }
+
+              // Show trial end popup if chat limit reached and not Pro
+              if (chatCount >= 3 && !isPro) {
+                setShowTrialEndPopup(true);
+              } else if (isPro) {
+                localStorage.setItem("vikalPro", "true");
+              }
+            } catch (error) {
+              console.error("Error fetching user status:", error);
+              toast({
+                title: "Error",
+                description: "Could not verify your chat limit status",
+                status: "error",
+                duration: 3000,
+                position: "top",
+              });
             }
           }
         });
@@ -161,7 +184,7 @@ const DashboardPage: React.FC = () => {
     animateStats();
     const interval = setInterval(animateStats, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [toast, router]);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -201,14 +224,9 @@ const DashboardPage: React.FC = () => {
     setIsLoading(true);
     setResponseData({ notes: "", resources: [] });
     try {
-      if (chatHistory.length >= 3 && !localStorage.getItem("vikalPro")) {
-        setIsProModalOpen(true);
-        return;
-      }
-
       const endpoint = isSolveMode ? `${API_URL}/solve` : `${API_URL}/explain`;
       const payloadKey = isSolveMode ? "problem" : "topic";
-      const styleMapping: { [key: string]: string } = {
+      const styleMapping = {
         "Smart & Quick": "smart",
         "Step-by-Step": "step",
         "Teacher Mode": "teacher",
@@ -225,7 +243,13 @@ const DashboardPage: React.FC = () => {
           explanation_style: isSolveMode ? styleMapping[selectedStyle] || selectedStyle.toLowerCase() : null,
         }),
       });
-      if (!res.ok) throw new Error(`Server error: ${res.status} - ${await res.text()}`);
+      if (!res.ok) {
+        const errorText = await res.text();
+        if (errorText.includes("Chat limit reached")) {
+          setShowTrialEndPopup(true);
+        }
+        throw new Error(`Server error: ${res.status} - ${errorText}`);
+      }
       const data = await res.json();
       console.log("API Response:", data);
       if (data.notes) {
@@ -252,12 +276,8 @@ const DashboardPage: React.FC = () => {
         if (typeof window !== "undefined") {
           localStorage.setItem("vikalChats", JSON.stringify(newChatHistory));
         }
-      } else if (data.error === "Chat limit reached. Upgrade to Pro for unlimited chats!") {
-        setIsProModalOpen(true);
-      } else {
-        throw new Error(data.error || "No response from server");
       }
-    } catch (error: unknown) {
+    } catch (error) {
       console.error("Fetch error:", error);
       toast({
         title: "Error",
